@@ -1,0 +1,22 @@
+[project]
+name = "cadastro-filiados"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.143.0",
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "sqlalchemy>=2.1.4",
+    "testcontainers>=4.15.0",
+]
+
+[project.scripts]
+cadastro-filiados = "cadastro_filiados:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
