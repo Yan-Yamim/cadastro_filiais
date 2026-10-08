@@ -1,4 +1,6 @@
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, func
+from datetime import date, datetime
+
+from sqlalchemy import Boolean, Date, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 table_registry = registry()
@@ -36,7 +38,7 @@ class Usuario:
         init=False, primary_key=True, autoincrement=True
     )
     nome_completo: Mapped[str] = mapped_column(String(150), nullable=False)
-    data_nascimento: Mapped[Date] = mapped_column(Date, nullable=False)
+    data_nascimento: Mapped[date] = mapped_column(Date, nullable=False)
     telefone: Mapped[str] = mapped_column(String(20), nullable=False)
     
     endereco_id: Mapped[int | None] = mapped_column(
@@ -45,7 +47,7 @@ class Usuario:
         default=None,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now()
     )
 

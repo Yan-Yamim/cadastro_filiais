@@ -1,13 +1,15 @@
 import os
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
-from testcontainers.postgres import PostgresContainer
 
+from testcontainers.community.postgres import PostgresContainer
+
+from cadastro_filiados.app import app
 from cadastro_filiados.database import get_session
-from cadastro_filiados import app
 from cadastro_filiados.models import table_registry
 
 
@@ -25,15 +27,16 @@ def postgres_container():
         os.environ["DATABASE_URL"] = url_sa
         os.environ["POSTGRES_HOST"] = host
         os.environ["POSTGRES_PORT"] = str(port)
+        os.environ["POSTGRES_USER"] = user
+        os.environ["POSTGRES_PASSWORD"] = password
+        os.environ["POSTGRES_DB"] = dbname
 
         yield postgres
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine(postgres_container):
-    url = postgres_container.get_connection_url().replace(
-        "postgresql+psycopg", "postgresql+asyncpg"
-    )
+    url = os.environ["DATABASE_URL"]
 
     _engine = create_async_engine(url, poolclass=NullPool)
 
@@ -55,7 +58,6 @@ async def session(engine):
     async with async_session() as session:
         yield session
         await session.rollback()
-        await session.close()
 
 
 @pytest_asyncio.fixture(loop_scope="function")

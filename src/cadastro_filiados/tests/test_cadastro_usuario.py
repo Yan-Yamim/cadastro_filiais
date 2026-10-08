@@ -1,7 +1,12 @@
+from datetime import date
 from unittest.mock import patch
+
 import pytest
 from fastapi import status
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
+
+from cadastro_filiados.app import app
 from cadastro_filiados.models import Usuario, Endereco, Atividade
 
 
@@ -30,7 +35,7 @@ async def test_criar_usuario_sucesso_201(client, session):
         ],
     }
 
-    response = await client.post("/cadastro/", json=payload)
+    response = await client.post("/cadastro", json=payload)
 
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
@@ -67,9 +72,9 @@ async def test_criar_usuario_erro_validacao_422(client):
         },
     }
 
-    response = await client.post("/cadastro/", json=payload_invalido)
+    response = await client.post("/cadastro", json=payload_invalido)
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     data = response.json()
     assert "detail" in data
 
@@ -78,7 +83,6 @@ async def test_criar_usuario_erro_validacao_422(client):
 async def test_criar_usuario_erro_interno_500(client):
     """
     Cenário 500: Erro inesperado durante a gravação no banco de dados.
-    Simulado injetando uma exceção no momento do db.commit().
     """
     payload = {
         "nome_completo": "Marcos Lima",
@@ -94,8 +98,46 @@ async def test_criar_usuario_erro_interno_500(client):
     }
 
     with patch(
-        "sqlalchemy.ext.asyncio.AsyncSession.commit",
+        "cadastro_filiados.views.AsyncSession.commit",
         side_effect=Exception("Falha crítica de banco de dados"),
     ):
-        with pytest.raises(Exception):
-            await client.post("/cadastro/", json=payload)
+        with pytest.raises(Exception, match="Falha crítica de banco de dados"):
+            await client.post("/cadastro", json=payload)
+
+
+@pytest.mark.asyncio(loop_scope="function")
+async def test_listar_usuarios_sucesso_200(client, session):
+    usuario = Usuario(
+        nome_completo="Pessoa para listagem",
+        data_nascimento=date(1995, 7, 20),
+        telefone="11912345678",
+    )
+    session.add(usuario)
+    await session.commit()
+
+    response = await client.get("/usuarios")
+
+    assert response.status_code == status.HTTP_200_OK
+    usuarios = response.json()
+    usuario_listado = next(
+        item
+        for item in usuarios
+        if item["usuario_id"] == usuario.usuario_id
+    )
+    assert usuario_listado["nome_completo"] == "Pessoa para listagem"
+    assert usuario_listado["telefone"] == "11912345678"
+
+
+@pytest.mark.asyncio(loop_scope="function")
+async def test_listar_usuarios_erro_interno_500(client):
+    with patch(
+        "cadastro_filiados.views.AsyncSession.execute",
+        side_effect=Exception("Falha ao consultar usuários"),
+    ):
+        async with AsyncClient(
+            transport=ASGITransport(app=app, raise_app_exceptions=False),
+            base_url="http://test",
+        ) as test_client:
+            response = await test_client.get("/usuarios")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
