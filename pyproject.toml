@@ -15,6 +15,7 @@ dependencies = [
     "pytest-asyncio>=1.4.0",
     "sqlalchemy>=2.1.4",
     "testcontainers>=4.15.0",
+    "uvicorn>=0.34.0",
 ]
 
 [project.scripts]

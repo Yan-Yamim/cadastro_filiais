@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#f4f7fb" />
+		<title>Cadastro de filiados</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+			crossorigin="anonymous"
+		/>
+		<link rel="stylesheet" href="style.css" />
+		<script src="app.js" defer></script>
+	</head>
+	<body>
+		<main class="container page-shell py-4 py-md-5">
+			<header class="mb-4 mb-md-5">
+				<div class="d-flex align-items-center gap-3">
+					<div>
+						<h1 class="h3 mb-0 fw-bold">Cadastro de filiados</h1>
+					</div>
+				</div>
+				<p class="text-muted-custom mt-3 mb-0">
+					Preencha os dados abaixo para registrar um novo filiado.
+				</p>
+			</header>
+
+			<div id="feedback" class="alert d-none" role="status" aria-live="polite"></div>
+
+			<form id="registration-form" class="card form-card" novalidate>
+				<section class="card-body p-4 p-md-5" aria-labelledby="personal-heading">
+					<div class="section-heading">
+						<div>
+							<h2 id="personal-heading" class="h5 mb-1 fw-bold">Dados pessoais</h2>
+							<p class="small text-muted-custom mb-0">Informações principais do filiado</p>
+						</div>
+					</div>
+
+					<div class="row g-3">
+						<div class="col-12">
+							<label for="nome_completo" class="form-label">Nome completo <span class="text-danger">*</span></label>
+							<input id="nome_completo" name="nome_completo" class="form-control" type="text" maxlength="150" autocomplete="name" required />
+						</div>
+						<div class="col-md-6">
+							<label for="data_nascimento" class="form-label">Data de nascimento <span class="text-danger">*</span></label>
+							<input id="data_nascimento" name="data_nascimento" class="form-control" type="date" required />
+						</div>
+						<div class="col-md-6">
+							<label for="telefone" class="form-label">Telefone <span class="text-danger">*</span></label>
+							<input id="telefone" name="telefone" class="form-control" type="tel" maxlength="20" autocomplete="tel" placeholder="(11) 91234-5678" required />
+						</div>
+						<div class="col-12">
+							<div class="form-check form-switch mt-1">
+								<input id="is_active" name="is_active" class="form-check-input" type="checkbox" role="switch" checked />
+								<label class="form-check-label fw-semibold" for="is_active">Filiado ativo</label>
+								<div class="form-text">Desative esta opção para cadastrar como inativo.</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<section class="card-body section-divider p-4 p-md-5" aria-labelledby="address-heading">
+					<div class="section-heading">
+						<div>
+							<h2 id="address-heading" class="h5 mb-1 fw-bold">Endereço</h2>
+							<p class="small text-muted-custom mb-0">Opcional — se informado, CEP, bairro, rua e número são obrigatórios</p>
+						</div>
+					</div>
+
+					<div class="row g-3">
+						<div class="col-sm-4">
+							<label for="cep" class="form-label">CEP</label>
+							<input id="cep" class="form-control address-field" type="text" maxlength="10" autocomplete="postal-code" placeholder="00000-000" />
+						</div>
+						<div class="col-sm-8">
+							<label for="bairro" class="form-label">Bairro</label>
+							<input id="bairro" class="form-control address-field" type="text" maxlength="100" autocomplete="address-level3" />
+						</div>
+						<div class="col-md-8">
+							<label for="rua" class="form-label">Rua</label>
+							<input id="rua" class="form-control address-field" type="text" maxlength="150" autocomplete="street-address" />
+						</div>
+						<div class="col-md-4">
+							<label for="numero" class="form-label">Número</label>
+							<input id="numero" class="form-control address-field" type="text" maxlength="20" />
+						</div>
+						<div class="col-12">
+							<label for="complemento" class="form-label">Complemento</label>
+							<input id="complemento" class="form-control address-field" type="text" maxlength="100" placeholder="Apartamento, bloco, referência..." />
+						</div>
+					</div>
+				</section>
+
+				<section class="card-body section-divider p-4 p-md-5" aria-labelledby="activities-heading">
+					<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+						<div class="section-heading mb-0">
+							<div>
+								<h2 id="activities-heading" class="h5 mb-1 fw-bold">Atividades</h2>
+								<p class="small text-muted-custom mb-0">Opcional — informe canais e atividades do filiado</p>
+							</div>
+						</div>
+						<button id="add-activity" class="btn btn-outline-primary btn-sm rounded-pill px-3" type="button">
+							+ Adicionar atividade
+						</button>
+					</div>
+					<div id="activity-list" class="d-grid gap-3"></div>
+				</section>
+
+				<footer class="card-body section-divider bg-light-subtle px-4 py-4 px-md-5">
+					<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+						<p class="small text-muted-custom mb-0"><span class="text-danger">*</span> Campos obrigatórios</p>
+						<button id="submit-button" class="btn btn-primary px-4" type="submit">
+							<span class="button-label">Salvar cadastro</span>
+							<span class="spinner-border spinner-border-sm ms-2 d-none" aria-hidden="true"></span>
+						</button>
+					</div>
+				</footer>
+			</form>
+		</main>
+
+		<template id="activity-template">
+			<div class="activity-card p-3 p-md-4">
+				<div class="d-flex align-items-center justify-content-between mb-3">
+					<h3 class="h6 mb-0 fw-semibold">Atividade</h3>
+					<button class="btn btn-sm btn-link text-danger text-decoration-none remove-activity" type="button" aria-label="Remover atividade">Remover</button>
+				</div>
+				<div class="row g-3">
+					<div class="col-md-5">
+						<label class="form-label">Canal</label>
+						<input class="form-control activity-channel" type="text" maxlength="100" placeholder="Ex.: E-mail, telefone, presencial" />
+					</div>
+					<div class="col-md-7">
+						<label class="form-label">Descrição</label>
+						<input class="form-control activity-description" type="text" maxlength="255" placeholder="Descreva a atividade" />
+					</div>
+				</div>
+			</div>
+		</template>
+	</body>
+</html>
